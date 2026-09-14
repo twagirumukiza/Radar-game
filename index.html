@@ -138,7 +138,6 @@
     color:var(--green) !important;
   }
   .btn-nav:hover{ background:var(--green-dimmer); }
-  @media(max-width:760px){ .nav-links a:not(.btn-nav){ display:none; } }
 
   .lang-switch{
     display:flex; align-items:center;
@@ -164,6 +163,59 @@
     font-weight:700;
   }
   .lang-switch button:hover:not(.active){ background:var(--green-dimmer); color:var(--green); }
+
+  .nav-right{ display:flex; align-items:center; gap:14px; }
+
+  .hamburger{
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:5px;
+    width:36px; height:36px;
+    background:transparent;
+    border:1px solid var(--green-mid);
+    border-radius:4px;
+    cursor:pointer;
+    padding:0;
+    flex-shrink:0;
+  }
+  .hamburger span{
+    display:block;
+    height:2px;
+    width:18px;
+    background:var(--green);
+    transition:transform .25s ease, opacity .2s ease;
+  }
+  .hamburger.open span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2){ opacity:0; }
+  .hamburger.open span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+
+  .mobile-menu{
+    display:none;
+    flex-direction:column;
+    background:var(--bg-panel);
+    border-top:1px solid var(--green-dimmer);
+    padding:6px 28px 18px;
+  }
+  .mobile-menu.open{ display:flex; }
+  .mobile-menu a{
+    font-family:'JetBrains Mono', monospace;
+    font-size:.85rem; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--text-dim);
+    padding:15px 2px;
+    border-bottom:1px solid var(--green-dimmer);
+  }
+  .mobile-menu a:last-child{ border-bottom:none; }
+  .mobile-menu a:hover, .mobile-menu a:active{ color:var(--green); }
+
+  @media(max-width:860px){
+    .nav-links{ display:none; }
+    .hamburger{ display:flex; }
+  }
+  @media(min-width:861px){
+    .mobile-menu{ display:none !important; }
+  }
 
   /* ---------- HERO ---------- */
   .hero{
@@ -739,12 +791,23 @@
       <a href="#arsenal" data-i18n="nav.arsenal">Arsenal</a>
       <a href="#ia" data-i18n="nav.ia">Joueur / IA</a>
       <a href="#telecharger" class="btn-nav" data-i18n="nav.telecharger">Télécharger</a>
+    </div>
+    <div class="nav-right">
       <div class="lang-switch" role="group" aria-label="Langue / Language">
         <button type="button" id="lang-fr" data-lang="fr">FR</button>
         <button type="button" id="lang-en" data-lang="en">EN</button>
       </div>
+      <button type="button" class="hamburger" id="hamburger-btn" aria-label="Menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </nav>
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="#jeu" data-i18n="nav.jeu">Le jeu</a>
+    <a href="#arsenal" data-i18n="nav.arsenal">Arsenal</a>
+    <a href="#ia" data-i18n="nav.ia">Joueur / IA</a>
+    <a href="#telecharger" data-i18n="nav.telecharger">Télécharger</a>
+  </div>
 </header>
 
 <section class="hero">
@@ -822,19 +885,6 @@
       </div>
       <div class="video-grid">
 
-
-          <div class="video-card">
-          <div class="video-frame">
-            <video class="zoomable-video" controls preload="none" playsinline poster="images/poster-contact-identifie-action.jpg">
-              <source src="videos/contact-identifie-action.mp4" type="video/mp4">
-            </video>
-          </div>
-          <div class="video-caption">
-            <h4 data-i18n="video5.title">Défense rapprochée</h4>
-            <p data-i18n="video5.desc">Tir au fusil d'assaut à quelques mètres du poste radar.</p>
-          </div>
-        </div>
-        
         <div class="video-card">
           <div class="video-frame">
             <video class="zoomable-video" controls preload="none" playsinline poster="images/poster-immersion-totale.jpg">
@@ -883,7 +933,17 @@
           </div>
         </div>
 
-      
+        <div class="video-card">
+          <div class="video-frame">
+            <video class="zoomable-video" controls preload="none" playsinline poster="images/poster-contact-identifie-action.jpg">
+              <source src="videos/contact-identifie-action.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="video-caption">
+            <h4 data-i18n="video5.title">Défense rapprochée</h4>
+            <p data-i18n="video5.desc">Tir au fusil d'assaut à quelques mètres du poste radar.</p>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -1226,6 +1286,38 @@
         else if(video.webkitEnterFullscreen){ video.webkitEnterFullscreen(); }
         else if(video.webkitRequestFullscreen){ video.webkitRequestFullscreen(); }
       });
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var hamburger = document.getElementById('hamburger-btn');
+  var mobileMenu = document.getElementById('mobile-menu');
+
+  function closeMenu(){
+    if(!mobileMenu || !hamburger) return;
+    mobileMenu.classList.remove('open');
+    hamburger.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
+  }
+  function toggleMenu(){
+    if(!mobileMenu || !hamburger) return;
+    var isOpen = mobileMenu.classList.toggle('open');
+    hamburger.classList.toggle('open', isOpen);
+    hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    if(hamburger) hamburger.addEventListener('click', toggleMenu);
+    if(mobileMenu){
+      mobileMenu.querySelectorAll('a').forEach(function(a){
+        a.addEventListener('click', closeMenu);
+      });
+    }
+    window.addEventListener('resize', function(){
+      if(window.innerWidth > 860) closeMenu();
     });
   });
 })();
